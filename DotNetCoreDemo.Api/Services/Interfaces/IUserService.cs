@@ -8,7 +8,7 @@ namespace DotNetCoreDemo.Api.Services
 {
     public interface IUserService
     {
-        public ServiceResult<User> Authenticate(string username, string password);
+        public ServiceResult<User> Authenticate(string userName, string password);
 
         public ServiceResult<User> Create(User user, string password);
 

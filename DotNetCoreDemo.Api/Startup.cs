@@ -75,7 +75,6 @@ namespace DotNetCoreDemo.Api
                 };
             });
 
-            services.AddSingleton(new DataContext(appSettings));
             services.AddSingleton(appSettings);
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IBooksService, BooksService>();

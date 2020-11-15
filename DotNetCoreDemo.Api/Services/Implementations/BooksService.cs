@@ -11,9 +11,9 @@ namespace DotNetCoreDemo.Api.Services
 
         private DataContext context;
 
-        public BooksService(DataContext context)
+        public BooksService(AppSettings appSettings)
         {
-            this.context = context;
+            this.context = new DataContext(appSettings);
         }
 
         public void GenerateSampleBooks()

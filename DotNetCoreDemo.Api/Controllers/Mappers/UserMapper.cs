@@ -14,7 +14,7 @@ namespace DotNetCoreDemo.Api.Controllers.Mappers
                 EmailAddress = controllerUser.EmailAddress,
                 FirstName = controllerUser.FirstName,
                 LastName = controllerUser.LastName,
-                Username = controllerUser.Username
+                UserName = controllerUser.UserName
             };
         }
 
@@ -25,7 +25,7 @@ namespace DotNetCoreDemo.Api.Controllers.Mappers
                 EmailAddress = serviceUser.EmailAddress,
                 FirstName = serviceUser.FirstName,
                 LastName = serviceUser.LastName,
-                Username = serviceUser.Username
+                UserName = serviceUser.UserName
             };
         }
     }

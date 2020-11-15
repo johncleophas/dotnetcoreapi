@@ -37,6 +37,10 @@ namespace DotNetCoreDemo.Api.Controllers
 
             var createdUser = userService.Create(serviceUser, model.Password);
 
+            if (createdUser.Result == null) {
+                return StatusCode((int)createdUser.Status, createdUser.Message);
+            }
+
             return StatusCode((int)createdUser.Status, UserMapper.MapToController(createdUser.Result));
         }
 
@@ -52,10 +56,12 @@ namespace DotNetCoreDemo.Api.Controllers
             };
 
 
-            var result = userService.Authenticate(user.Username, user.Password);
+            var result = userService.Authenticate(user.UserName, user.Password);
+
+            var userDetails = userService.GetUserByUserName(user.UserName);
 
             if (result.Result == null)
-                return StatusCode((int)serviceResult.Status, null);
+                return StatusCode((int)serviceResult.Status, result.Message);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
@@ -63,7 +69,7 @@ namespace DotNetCoreDemo.Api.Controllers
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Username)
+                    new Claim(ClaimTypes.Name, user.UserName)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -73,14 +79,14 @@ namespace DotNetCoreDemo.Api.Controllers
 
             return Ok(new
             {
-                Username = user.Username,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                UserName = userDetails.Result.UserName,
+                FirstName = userDetails.Result.FirstName,
+                LastName = userDetails.Result.LastName,
                 Token = tokenString
             });
         }
 
-        [HttpGet("{username}")]
+        [HttpGet("{userName}")]
         public IActionResult GetByUserName(string userName)
         {
             var user = userService.GetUserByUserName(userName);

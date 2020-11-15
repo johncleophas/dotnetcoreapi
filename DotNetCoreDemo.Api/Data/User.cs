@@ -23,7 +23,7 @@ namespace DotNetCoreDemo.Api.Data
         public string LastName { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         public byte[] Hash { get; set; }

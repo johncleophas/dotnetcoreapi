@@ -12,12 +12,12 @@ namespace DotNetCoreDemo.Api.Services
 
         private DataContext context;
 
-        public UserService(DataContext context)
+        public UserService(AppSettings appSettings)
         {
-            this.context = context;
+            this.context = new DataContext(appSettings);
         }
 
-        public ServiceResult<User> Authenticate(string username, string password)
+        public ServiceResult<User> Authenticate(string userName, string password)
         {
 
             var result = new ServiceResult<User>
@@ -26,12 +26,12 @@ namespace DotNetCoreDemo.Api.Services
                 Status = System.Net.HttpStatusCode.InternalServerError
             };
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
             {
                 return result;
             }
 
-            var user = context.Users.SingleOrDefault(x => x.Username == username);
+            var user = context.Users.SingleOrDefault(x => x.UserName == userName);
 
             if (user == null)
             {
@@ -40,6 +40,8 @@ namespace DotNetCoreDemo.Api.Services
 
             if (!VerifyPasswordHash(password, user.Hash, user.Salt))
             {
+                result.Message = "Invalid credentials!";
+
                 return result;
             }
 
@@ -67,9 +69,9 @@ namespace DotNetCoreDemo.Api.Services
             }
 
 
-            if (this.context.Users.Any(x => x.Username == user.Username))
+            if (this.context.Users.Any(x => x.UserName == user.UserName))
             {
-                result.Message = $"Username {user.Username} is already taken";
+                result.Message = $"Username {user.UserName} is already taken";
                 result.Status = System.Net.HttpStatusCode.InternalServerError;
                 return result;
 
@@ -102,7 +104,7 @@ namespace DotNetCoreDemo.Api.Services
         public ServiceResult<User> GetUserByUserName(string userName)
         {
             var user = this.context.Users
-                .Where(e => e.Username == userName).FirstOrDefault();
+                .Where(e => e.UserName == userName).FirstOrDefault();
 
             if (user == null)
             {
@@ -134,7 +136,8 @@ namespace DotNetCoreDemo.Api.Services
                     Status = System.Net.HttpStatusCode.OK
                 };
             }
-            else {
+            else
+            {
                 return new ServiceResult<bool>()
                 {
                     Message = "User not found",
