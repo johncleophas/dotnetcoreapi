@@ -21,30 +21,41 @@ namespace DotNetCoreDemo.Api.Controllers
     {
         private readonly ILogger<UserController> logger;
         private ISubscriptionService subscriptionService;
+        private IUserService userService;
         private readonly AppSettings appSettings;
-        public SubscriptionController(ILogger<UserController> logger, ISubscriptionService subscriptionService, AppSettings appSettings)
+        public SubscriptionController(ILogger<UserController> logger, ISubscriptionService subscriptionService, AppSettings appSettings, IUserService userService)
         {
             this.logger = logger;
             this.subscriptionService = subscriptionService;
             this.appSettings = appSettings;
+            this.userService = userService;
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] Subscription model)
         {
-            var serviceSubscription = SubscriptionMapper.MapToService(model);
+
+            var user = this.userService.GetUserByUserName(model.UserName);
+
+            var serviceSubscription = SubscriptionMapper.MapToService(model, user.Result.Id);
 
             var createdSubscription = subscriptionService.Create(serviceSubscription);
 
             return StatusCode((int)createdSubscription.Status, SubscriptionMapper.MapToController(createdSubscription.Result));
         }
 
-        [HttpGet("{username}")]
-        public IActionResult GetSubscriptionsByUser(string userName)
-        {
-            var subscriptionResult = subscriptionService.GetSubscriptionsByUser(userName);
+        [HttpGet("availablebooks/{userName}")]
+        public IActionResult GetAvailableBooksByUser(string userName) {
+            var subscriptionResult = subscriptionService.GetAvailableBooksByUser(userName);
 
-            return StatusCode((int)subscriptionResult.Status, SubscriptionMapper.MapSubscriptionsToController(subscriptionResult.Result));
+            return StatusCode((int)subscriptionResult.Status, subscriptionResult.Result);
+        }
+
+        [HttpGet("subscribedbooks/{userName}")]
+        public IActionResult GetSubscribedBooksByUser(string userName) {
+            var subscriptionResult = subscriptionService.GetSubscribedBooksByUser(userName);
+
+            return StatusCode((int)subscriptionResult.Status, subscriptionResult.Result);
         }
 
         [HttpDelete("{id}")]

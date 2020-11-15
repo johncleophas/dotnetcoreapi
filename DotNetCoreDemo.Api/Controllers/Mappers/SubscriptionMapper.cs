@@ -7,13 +7,13 @@ namespace DotNetCoreDemo.Api.Controllers.Mappers
 {
     public static class SubscriptionMapper
     {
-        public static Data.Subscription MapToService(Subscription controllerSubscription)
+        public static Data.Subscription MapToService(Subscription controllerSubscription, int userId)
         {
             return new Data.Subscription()
             {
                 Id = controllerSubscription.Id,
                 BookId = controllerSubscription.BookId,
-                UserId = controllerSubscription.UserId
+                UserId = userId
             };
         }
 
@@ -22,8 +22,7 @@ namespace DotNetCoreDemo.Api.Controllers.Mappers
             return new Subscription()
             {
                 BookId = serviceSubscription.BookId,
-                Id = serviceSubscription.Id,
-                UserId = serviceSubscription.UserId
+                Id = serviceSubscription.Id
             };
         }
 

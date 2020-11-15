@@ -1,4 +1,5 @@
-﻿using DotNetCoreDemo.Api.Data;
+﻿using DotNetCoreDemo.Api.Controllers.Models;
+using DotNetCoreDemo.Api.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,9 @@ namespace DotNetCoreDemo.Api.Services
 
         public ServiceResult<Subscription> Create(Subscription subscription);
 
-        public ServiceResult<List<Subscription>> GetSubscriptionsByUser(string userName);
+        public ServiceResult<List<UserBookSubscription>> GetSubscribedBooksByUser(string userName);
 
+        public ServiceResult<List<UserBookSubscription>> GetAvailableBooksByUser(string userName);
         public ServiceResult<bool> Delete(int id);
     }
 }

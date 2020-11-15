@@ -1,4 +1,5 @@
-﻿using DotNetCoreDemo.Api.Data;
+﻿using DotNetCoreDemo.Api.Controllers.Models;
+using DotNetCoreDemo.Api.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,9 @@ namespace DotNetCoreDemo.Api.Services
 
         private DataContext context;
 
-        public SubscriptionService(DataContext context)
+        public SubscriptionService(AppSettings appSettings)
         {
-            this.context = context;
+            this.context = new DataContext(appSettings);
         }
 
         public ServiceResult<Subscription> Create(Subscription subscription)
@@ -28,21 +29,102 @@ namespace DotNetCoreDemo.Api.Services
             };
         }
 
-        public ServiceResult<List<Subscription>> GetSubscriptionsByUser(string userName)
+        public ServiceResult<List<UserBookSubscription>> GetSubscribedBooksByUser(string userName)
         {
-
-            var user = this.context.Users.FirstOrDefault(e => e.Username == userName);
-
-            if (user == null)
+            try
             {
-                throw new ArgumentException($"Username {user.Username} not found");
+                var user = this.context.Users.FirstOrDefault(e => e.UserName == userName);
+
+                if (user == null)
+                {
+                    throw new ArgumentException($"Username {userName} not found");
+                }
+
+                var activeSubscriptions = this.context.Subscriptions.Where(e => e.UserId == user.Id).ToList();
+
+                var allBooks = this.context.Books;
+
+                var subs = new List<UserBookSubscription>();
+
+                foreach (var item in activeSubscriptions)
+                {
+                    var book = allBooks.SingleOrDefault(e=>e.Id == item.BookId);
+
+                        subs.Add(new UserBookSubscription()
+                        {
+                            BookId = book.Id,
+                            Name = book.Name,
+                            Price = book.Price,
+                            SubscriptionId = item.Id,
+                            Text = book.Text,
+                            Username = user.UserName
+                        });
+                }
+
+                return new ServiceResult<List<UserBookSubscription>>()
+                {
+                    Result = subs,
+                    Status = System.Net.HttpStatusCode.OK
+                };
             }
-
-            return new ServiceResult<List<Subscription>>()
+            catch (Exception)
             {
-                Result = this.context.Subscriptions.Where(e => e.UserId == user.Id).ToList(),
-                Status = System.Net.HttpStatusCode.OK
-            };
+                return new ServiceResult<List<UserBookSubscription>>()
+                {
+                    Result = null,
+                    Message = "Unable to return results",
+                    Status = System.Net.HttpStatusCode.InternalServerError
+                };
+            }
+        }
+
+        public ServiceResult<List<UserBookSubscription>> GetAvailableBooksByUser(string userName)
+        {
+            try
+            {
+                var user = this.context.Users.FirstOrDefault(e => e.UserName == userName);
+
+                if (user == null)
+                {
+                    throw new ArgumentException($"Username {userName} not found");
+                }
+
+                var activeSubscriptions = this.context.Subscriptions.Where(e => e.UserId == user.Id).ToList();
+
+                var allBooks = this.context.Books;
+
+                var availableSubs = new List<UserBookSubscription>();
+
+                foreach (var item in allBooks)
+                {
+                    if (!activeSubscriptions.Select(e => e.BookId).Contains(item.Id)){
+                        availableSubs.Add(new UserBookSubscription()
+                        {
+                            BookId = item.Id,
+                            Name = item.Name,
+                            Price = item.Price,
+                            SubscriptionId = 0,
+                            Text = item.Text,
+                            Username = user.UserName
+                        });
+                    }
+                }
+
+                return new ServiceResult<List<UserBookSubscription>>()
+                {
+                    Result = availableSubs,
+                    Status = System.Net.HttpStatusCode.OK
+                };
+            }
+            catch (Exception)
+            {
+                return new ServiceResult<List<UserBookSubscription>>()
+                {
+                    Result = null,
+                    Message = "Unable to return results",
+                    Status = System.Net.HttpStatusCode.InternalServerError
+                };
+            }
         }
 
         public ServiceResult<bool> Delete(int id)
@@ -60,7 +142,8 @@ namespace DotNetCoreDemo.Api.Services
                     Status = System.Net.HttpStatusCode.OK
                 };
             }
-            else {
+            else
+            {
                 return new ServiceResult<bool>()
                 {
                     Message = "User not found",

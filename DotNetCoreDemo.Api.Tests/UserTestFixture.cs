@@ -16,7 +16,6 @@ namespace DotNetCoreDemo.Api.Tests
 
         public UserTestFixture()
         {
-
             this.appSettings = new AppSettings()
             {
                 DatabaseLocation = "D:\\Projects\\angular-dotnetcore-api-stack\\dotnetcoreapi\\"
@@ -127,7 +126,7 @@ namespace DotNetCoreDemo.Api.Tests
         {
             // Arrange
             var context = new DataContext(this.appSettings);
-            var userService = new UserService(new DataContext(this.appSettings));
+            var userService = new UserService(this.appSettings);
 
             var userName = Guid.NewGuid().ToString();
 
@@ -136,7 +135,7 @@ namespace DotNetCoreDemo.Api.Tests
                 EmailAddress = "dd",
                 FirstName = "ff",
                 LastName = "gg",
-                Username = userName,
+                UserName = userName,
             };
 
             //Act
@@ -147,11 +146,6 @@ namespace DotNetCoreDemo.Api.Tests
 
             //CleanUp
             userService.Delete(createdUser.Result.Id);
-
-            //var booksService = new BooksService(context);
-
-            //booksService.GenerateSampleBooks();
-
         }
 
         [Fact]
@@ -159,7 +153,7 @@ namespace DotNetCoreDemo.Api.Tests
         {
             // Arrange
             var context = new DataContext(this.appSettings);
-            var userService = new UserService(new DataContext(this.appSettings));
+            var userService = new UserService(this.appSettings);
 
             var userName = Guid.NewGuid().ToString();
 
@@ -168,12 +162,12 @@ namespace DotNetCoreDemo.Api.Tests
                 EmailAddress = "dd",
                 FirstName = "ff",
                 LastName = "gg",
-                Username = userName,
+                UserName = userName,
             };
 
             //Act
             var createdUser = userService.Create(user, "verylongpasswordmustgohere");
-            var authenticatedUser = userService.Authenticate(createdUser.Result.Username, "verylongpasswordmustgohere");
+            var authenticatedUser = userService.Authenticate(createdUser.Result.UserName, "verylongpasswordmustgohere");
 
             //Assert
             Assert.NotNull(authenticatedUser);
